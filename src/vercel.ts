@@ -12,4 +12,4 @@ const app = restate
   .bind(kycService)
   .bind(useronboardingFlow);
 
-export default app.handler();
+export default app;
