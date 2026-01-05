@@ -9,9 +9,11 @@
   "env": {
     "NODE_ENV": "production"
   },
-  "functions": {
-    "src/vercel.ts": {
-      "maxDuration": 30
+ "builds": [
+    {
+      "src": "src/vercel.ts",
+      "use": "@vercel/node"
     }
-  }
+  ]
+
 }
