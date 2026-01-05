@@ -1,0 +1,12 @@
+[worker.invoker]
+abort_timeout = "30m"
+concurrent_invocations_limit = 100
+message_size_limit = "10MB"
+
+[worker.invoker.retry_policy]
+initial_interval = "1s"
+max_interval = "10s"
+max_attempts = 3
+
+[logging]
+level = "info"

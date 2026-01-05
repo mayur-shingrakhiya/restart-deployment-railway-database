@@ -1,0 +1,42 @@
+{
+  "name": "restate-api",
+  "version": "1.0.0",
+  "engines": {
+    "node": "18.x"
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "ts-node src/index.ts",
+    "vercel-build": "prisma generate && npm run build",
+    "start": "node dist/vercel.js",
+    "startrestate:win": "scripts\\start-restate.bat",
+    "register:win": "scripts\\register.bat",
+    "restate-server": "restate-server.exe --config restate.yaml",
+    "start:win": "scripts\\start.bat",
+    "schedule:win": "scripts\\schedule.bat",
+    "checkstatus:win": "scripts\\check-status.bat",
+    "stop:scheduler": "scripts\\stop-scheduler.bat",
+    "socket-start": "ts-node src/socket.server.ts"
+  },
+
+ 
+  "dependencies": {
+    "@prisma/client": "^6.19.1",
+    "@restatedev/restate-sdk": "^1.9.1",
+    "@restatedev/restate-sdk-clients": "^1.9.1",
+    "cron-parser": "^5.4.0",
+    "express": "^5.2.1",
+    "socket.io": "^4.8.2",
+    "zod": "^4.2.1"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.6",
+    "@types/node-cron": "^3.0.11",
+    "concurrently": "^9.2.1",
+    "node-cron": "^4.2.1",
+    "prisma": "^6.19.1",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.3"
+  },
+  "type": "commonjs"
+}

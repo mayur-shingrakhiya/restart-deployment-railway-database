@@ -1,0 +1,448 @@
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "windows"]
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model accounts {
+  id             Int                   @id @default(autoincrement())
+  user_id        Int
+  account_number BigInt                @unique(map: "account_number")
+  account_type   accounts_account_type
+  balance        Decimal?              @default(0.00) @db.Decimal(10, 2)
+  status         accounts_status?      @default(active)
+  created_at     DateTime              @default(now()) @db.Timestamp(0)
+  updated_at     DateTime              @default(now()) @db.Timestamp(0)
+  users          users                 @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "accounts_ibfk_1")
+
+  @@index([user_id], map: "user_id")
+}
+
+model brockrage_pk_mast {
+  id         Int       @id @default(autoincrement())
+  ib_id      Int
+  pk_id      String    @db.Text
+  pk_balance Float     @default(0) @db.Float
+  currency   String    @db.Text
+  ip         String?   @db.VarChar(25)
+  created_at DateTime? @db.DateTime(0)
+  updated_at DateTime? @db.DateTime(0)
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model brockrage_pk_tran {
+  id                 Int       @id @default(autoincrement())
+  pk_id              String    @db.Text
+  ref_id             String?   @db.Text
+  ib_id              Int
+  type               String    @db.VarChar(2)
+  tran_from          String?   @db.VarChar(50)
+  tran_to            String?   @db.VarChar(50)
+  amount             Float?    @db.Float
+  net_amount         Float     @db.Float
+  balance            Float?    @db.Float
+  our_transaction_id String?   @db.Text
+  tran_type          String    @db.Text
+  transaction_time   DateTime? @db.DateTime(0)
+  comment            String?   @db.VarChar(150)
+  ip                 String?   @db.VarChar(20)
+  created_at         DateTime? @db.DateTime(0)
+  updated_at         DateTime? @db.DateTime(0)
+}
+
+model brockrage_transaction_list {
+  id                       BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+  email                    String?   @db.VarChar(255)
+  job_id                   BigInt    @db.UnsignedBigInt
+  ticket_no                BigInt    @db.UnsignedBigInt
+  account_no_trader        BigInt    @db.UnsignedBigInt
+  account_no_ib            BigInt    @db.UnsignedBigInt
+  lot_size                 Decimal   @db.Decimal(10, 4)
+  symbol                   String    @db.VarChar(50)
+  total_usd_to_distribute  Decimal   @db.Decimal(10, 4)
+  percentage_to_distribute Decimal   @db.Decimal(10, 2)
+  amount                   Decimal   @db.Decimal(10, 4)
+  trans_id                 BigInt?   @db.UnsignedBigInt
+  created_at               DateTime? @db.Timestamp(0)
+  updated_at               DateTime? @db.Timestamp(0)
+
+  @@index([account_no_ib], map: "account_no_ib_index")
+  @@index([account_no_trader], map: "account_no_trader_index")
+  @@index([email], map: "email_index")
+  @@index([job_id], map: "job_id_index")
+  @@index([ticket_no], map: "ticket_no_index")
+  @@index([trans_id], map: "trans_id_index")
+}
+
+model deposits {
+  id                 Int                   @id @default(autoincrement())
+  our_transaction_id String                @db.VarChar(255)
+  user_id            Int
+  amount             Decimal               @db.Decimal(10, 2)
+  account_type       deposits_account_type
+  account_number     String                @db.VarChar(255)
+  status             deposits_status?      @default(pending)
+  reason             String?               @db.VarChar(255)
+  gateway            String                @db.VarChar(255)
+  created_at         DateTime              @default(now()) @db.Timestamp(0)
+  updated_at         DateTime              @default(now()) @db.Timestamp(0)
+  users              users                 @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "deposits_ibfk_1")
+
+  @@index([user_id], map: "user_id")
+}
+
+model distribution {
+  id           Int      @id @default(autoincrement())
+  group        String?  @db.VarChar(255)
+  col1         String?  @db.Text
+  col2         String?  @db.Text
+  col3         String?  @db.Text
+  col4         String?  @db.Text
+  col5         String?  @db.Text
+  col6         String?  @db.Text
+  col7         String?  @db.Text
+  col8         String?  @db.Text
+  col9         String?  @db.Text
+  col10        String?  @db.Text
+  col11        String?  @db.Text
+  fx_majors    Float?
+  fx_minors    Float?
+  fx_yen       Float?
+  spot_silver  Float?
+  spot_gold    Float?
+  spot_energy  Float?
+  dow          Float?
+  spot_indices Float?
+  spxm         Float?
+  crypto       Float?
+  created_at   DateTime @db.DateTime(0)
+  updated_at   DateTime @default(now()) @db.DateTime(0)
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model ib_users {
+  id                             Int                   @id @default(autoincrement())
+  user_id                        Int?
+  ib_prefix                      ib_users_ib_prefix?   @default(IB)
+  name                           String                @db.MediumText
+  last_name                      String                @db.MediumText
+  email                          String                @db.MediumText
+  password                       String?               @db.MediumText
+  dob                            String                @db.MediumText
+  phonedigit                     Int?
+  phone                          String                @db.MediumText
+  country                        String                @db.MediumText
+  address                        String?               @db.LongText
+  state                          String?               @db.VarChar(80)
+  avatar                         String?               @db.MediumText
+  referal                        BigInt?               @default(0)
+  referal_link                   String?               @db.VarChar(255)
+  json                           String?               @db.MediumText
+  leverage                       String?               @db.VarChar(25)
+  status                         ib_users_status?      @default(active)
+  fundtransfer                   ib_users_fundtransfer @default(active)
+  ib_account                     Int                   @default(0)
+  upiblist                       String?               @db.MediumText
+  downiblist                     String?               @db.MediumText
+  investorlist                   String?               @db.LongText
+  fund_distribution_level        Int                   @default(0)
+  fund_distribution_type         String?               @db.VarChar(20)
+  withdraw_no_ac_limit           String?               @default("5") @db.VarChar(50)
+  withdraw_min_fund_each_account String?               @default("200") @db.VarChar(100)
+  regtime                        String?               @db.MediumText
+  ip                             String?               @db.MediumText
+  verification                   Int?                  @default(0)
+  groups                         String?               @db.VarChar(55)
+  currency                       String?               @db.VarChar(200)
+  zipcode                        String                @db.VarChar(200)
+  city                           String                @db.VarChar(200)
+  tradingexp                     String?               @db.VarChar(254)
+  type_proof                     String?               @db.VarChar(20)
+  group_plan                     String?               @db.VarChar(30)
+  assign_status                  Int?
+  broker_code                    String?               @db.VarChar(20)
+  asset_value                    String?               @db.VarChar(15)
+  source_funds                   String?               @db.VarChar(15)
+  share_exp                      String?               @db.VarChar(3)
+  risk_market                    String?               @db.VarChar(3)
+  trading_style                  String?               @db.VarChar(100)
+  intend_trader                  String?               @db.VarChar(6)
+  company                        String?               @db.VarChar(255)
+  website                        String?               @db.VarChar(255)
+  ib_experience                  String?               @db.VarChar(255)
+  tax_id                         String?               @db.VarChar(255)
+  skype                          String?               @db.VarChar(255)
+  wechat                         String?               @db.VarChar(255)
+  qq                             String?               @db.VarChar(255)
+  msn                            String?               @db.VarChar(255)
+  remember_token                 String?               @db.VarChar(255)
+  last_login                     DateTime?             @db.DateTime(0)
+  created_at                     DateTime?             @db.DateTime(0)
+  updated_at                     DateTime?             @db.DateTime(0)
+  reg_status                     String?               @db.MediumText
+  hash_key                       String?               @db.MediumText
+  hash_key2                      String?               @db.MediumText
+  countrycode                    String?               @db.VarChar(11)
+  chaavi                         String?               @db.VarChar(255)
+  nationality                    String?               @db.VarChar(255)
+  other_account                  Int?
+  subject_tax                    Int?
+  pep_person                     Int?
+  product_traded                 String?               @db.LongText
+  account_type                   ib_users_account_type @default(DEMO)
+}
+
+model mt4_users {
+  LOGIN              BigInt   @id
+  GROUP              String   @db.Char(16)
+  ENABLE             Int
+  ENABLE_CHANGE_PASS Int
+  ENABLE_READONLY    Int
+  ENABLE_OTP         Int      @default(0)
+  PASSWORD_PHONE     String   @db.Char(32)
+  NAME               String   @db.Char(128)
+  COUNTRY            String   @db.Char(32)
+  CITY               String   @db.Char(32)
+  STATE              String   @db.Char(32)
+  ZIPCODE            String   @db.Char(16)
+  ADDRESS            String   @db.Char(128)
+  LEAD_SOURCE        String   @default("") @db.Char(32)
+  PHONE              String   @db.Char(32)
+  EMAIL              String   @db.Char(48)
+  COMMENT            String   @db.Char(64)
+  ID                 String   @db.Char(32)
+  STATUS             String   @db.Char(16)
+  REGDATE            DateTime @db.DateTime(0)
+  LASTDATE           DateTime @db.DateTime(0)
+  LEVERAGE           Int
+  AGENT_ACCOUNT      Int
+  TIMESTAMP          Int
+  BALANCE            Float
+  PREVMONTHBALANCE   Float
+  PREVBALANCE        Float
+  CREDIT             Float
+  INTERESTRATE       Float
+  TAXES              Float
+  SEND_REPORTS       Int
+  MQID               Int      @default(0) @db.UnsignedInt
+  USER_COLOR         Int
+  EQUITY             Float    @default(0)
+  MARGIN             Float    @default(0)
+  MARGIN_LEVEL       Float    @default(0)
+  MARGIN_FREE        Float    @default(0)
+  CURRENCY           String   @default("") @db.Char(16)
+  API_DATA           Bytes?   @db.Blob
+  MODIFY_TIME        DateTime @db.DateTime(0)
+
+  @@index([TIMESTAMP], map: "INDEX_STAMP")
+}
+
+model mt5_deals {
+  Deal             BigInt   @id @default(0) @db.UnsignedBigInt
+  Timestamp        BigInt   @default(0)
+  ExternalID       String   @default("") @db.VarChar(32)
+  Login            BigInt   @default(0) @db.UnsignedBigInt
+  Dealer           BigInt   @default(0) @db.UnsignedBigInt
+  Order            BigInt   @default(0) @db.UnsignedBigInt
+  Action           Int      @default(0) @db.UnsignedInt
+  Entry            Int      @default(0) @db.UnsignedInt
+  Reason           Int      @default(0) @db.UnsignedInt
+  Digits           Int      @default(0) @db.UnsignedInt
+  DigitsCurrency   Int      @default(0) @db.UnsignedInt
+  ContractSize     Float    @default(0)
+  Time             DateTime @default(dbgenerated("('0000-00-00 00:00:00')")) @db.DateTime(0)
+  TimeMsc          DateTime @default(dbgenerated("('0000-00-00 00:00:00.000000')")) @db.DateTime(6)
+  Symbol           String   @default("") @db.VarChar(32)
+  Price            Float    @default(0)
+  VolumeExt        BigInt   @default(0) @db.UnsignedBigInt
+  Profit           Float    @default(0)
+  Storage          Float    @default(0)
+  Commission       Float    @default(0)
+  Fee              Float    @default(0)
+  RateProfit       Float    @default(0)
+  RateMargin       Float    @default(0)
+  ExpertID         BigInt   @default(0) @db.UnsignedBigInt
+  PositionID       BigInt   @default(0) @db.UnsignedBigInt
+  PartyID          BigInt   @default(0) @db.UnsignedBigInt
+  Comment          String   @default("") @db.VarChar(32)
+  ProfitRaw        Float    @default(0)
+  PricePosition    Float    @default(0)
+  PriceSL          Float    @default(0)
+  PriceTP          Float    @default(0)
+  VolumeClosedExt  BigInt   @default(0) @db.UnsignedBigInt
+  TickValue        Float    @default(0)
+  TickSize         Float    @default(0)
+  Flags            Int      @default(0) @db.UnsignedInt
+  Value            Float    @default(0)
+  Gateway          String   @default("") @db.VarChar(16)
+  PriceGateway     Float    @default(0)
+  VolumeGatewayExt BigInt   @default(0) @db.UnsignedBigInt
+  ActionGateway    Int      @default(0) @db.UnsignedInt
+  ModifyFlags      Int      @default(0) @db.UnsignedInt
+  MarketBid        Float    @default(0)
+  MarketAsk        Float    @default(0)
+  MarketLast       Float    @default(0)
+  Volume           BigInt   @default(0) @db.UnsignedBigInt
+  VolumeClosed     BigInt   @default(0) @db.UnsignedBigInt
+  ApiData          String   @default("") @db.VarChar(4000)
+
+  @@index([Timestamp], map: "IDX_mt5_deals_Timestamp")
+}
+
+model mt5_users {
+  Login             BigInt   @id @default(0) @db.UnsignedBigInt
+  Timestamp         BigInt   @default(0)
+  Group             String   @default("") @db.VarChar(64)
+  CertSerialNumber  BigInt   @default(0) @db.UnsignedBigInt
+  Rights            BigInt   @default(0) @db.UnsignedBigInt
+  Registration      DateTime @default(dbgenerated("('0000-00-00 00:00:00')")) @db.DateTime(0)
+  LastAccess        DateTime @default(dbgenerated("('0000-00-00 00:00:00')")) @db.DateTime(0)
+  LastPassChange    DateTime @default(dbgenerated("('0000-00-00 00:00:00')")) @db.DateTime(0)
+  FirstName         String   @default("") @db.VarChar(128)
+  LastName          String   @default("") @db.VarChar(64)
+  MiddleName        String   @default("") @db.VarChar(64)
+  Company           String   @default("") @db.VarChar(64)
+  Account           String   @default("") @db.VarChar(32)
+  Country           String   @default("") @db.VarChar(32)
+  Language          Int      @default(0) @db.UnsignedInt
+  ClientID          BigInt   @default(0) @db.UnsignedBigInt
+  City              String   @default("") @db.VarChar(32)
+  State             String   @default("") @db.VarChar(32)
+  ZipCode           String   @default("") @db.VarChar(16)
+  Address           String   @default("") @db.VarChar(128)
+  Phone             String   @default("") @db.VarChar(32)
+  Email             String   @default("") @db.VarChar(64)
+  ID                String   @default("") @db.VarChar(32)
+  Status            String   @default("") @db.VarChar(16)
+  Comment           String   @default("") @db.VarChar(64)
+  Color             Int      @default(0) @db.UnsignedInt
+  PhonePassword     String   @default("") @db.VarChar(32)
+  Leverage          Int      @default(0) @db.UnsignedInt
+  Agent             BigInt   @default(0) @db.UnsignedBigInt
+  TradeAccounts     String   @default("") @db.VarChar(128)
+  LimitPositions    Float    @default(0)
+  LimitOrders       Int      @default(0) @db.UnsignedInt
+  LeadCampaign      String   @default("") @db.VarChar(32)
+  LeadSource        String   @default("") @db.VarChar(32)
+  TimestampTrade    BigInt   @default(0)
+  Balance           Float    @default(0)
+  Credit            Float    @default(0)
+  InterestRate      Float    @default(0)
+  CommissionDaily   Float    @default(0)
+  CommissionMonthly Float    @default(0)
+  BalancePrevDay    Float    @default(0)
+  BalancePrevMonth  Float    @default(0)
+  EquityPrevDay     Float    @default(0)
+  EquityPrevMonth   Float    @default(0)
+  Name              String   @default("") @db.VarChar(256)
+  MQID              String   @default("") @db.VarChar(16)
+  LastIP            String   @default("") @db.VarChar(64)
+  ApiData           String   @default("") @db.VarChar(4000)
+
+  @@index([Timestamp], map: "IDX_mt5_users_Timestamp")
+}
+
+model payment_gateway {
+  id                 Int      @id @default(autoincrement())
+  user_id            Int
+  deposit_gateway    String   @db.VarChar(255)
+  withdrawal_gateway String   @db.VarChar(255)
+  created_at         DateTime @default(now()) @db.Timestamp(0)
+  updated_at         DateTime @default(now()) @db.Timestamp(0)
+  users              users    @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "payment_gateway_ibfk_1")
+
+  @@index([user_id], map: "user_id")
+}
+
+model users {
+  id              Int               @id @default(autoincrement())
+  firstName       String            @db.VarChar(255)
+  lastName        String            @db.VarChar(255)
+  email           String            @unique(map: "email") @db.VarChar(255)
+  password        String            @db.VarChar(255)
+  pin             String?           @db.VarChar(255)
+  countryCode     String            @db.VarChar(10)
+  phoneNumber     String            @db.VarChar(20)
+  country         String            @db.VarChar(100)
+  state           String            @db.VarChar(100)
+  city            String            @db.VarChar(100)
+  pincode         String            @db.VarChar(20)
+  kyc_verify      Boolean?          @default(false)
+  status          users_status?     @default(active)
+  created_at      DateTime          @default(now()) @db.Timestamp(0)
+  updated_at      DateTime          @default(now()) @db.Timestamp(0)
+  accounts        accounts[]
+  deposits        deposits[]
+  payment_gateway payment_gateway[]
+  wallets         wallets[]
+}
+
+model wallets {
+  id            Int             @id @default(autoincrement())
+  user_id       Int
+  wallet_number String          @unique(map: "wallet_number") @db.VarChar(255)
+  balance       Decimal?        @default(0.00) @db.Decimal(10, 2)
+  status        wallets_status? @default(active)
+  created_at    DateTime        @default(now()) @db.Timestamp(0)
+  updated_at    DateTime        @default(now()) @db.Timestamp(0)
+  users         users           @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "wallets_ibfk_1")
+
+  @@index([user_id], map: "user_id")
+}
+
+enum ib_users_ib_prefix {
+  IB
+  MIB
+}
+
+enum accounts_account_type {
+  mt4
+  mt5
+}
+
+enum deposits_account_type {
+  mt4
+  mt5
+  wallet
+}
+
+enum wallets_status {
+  active
+  inactive
+}
+
+enum accounts_status {
+  active
+  inactive
+}
+
+enum deposits_status {
+  pending
+  success
+  failed
+  cancelled
+}
+
+enum users_status {
+  active
+  inactive
+}
+
+enum ib_users_status {
+  active
+  inactive
+}
+
+enum ib_users_fundtransfer {
+  active
+  inactive
+}
+
+enum ib_users_account_type {
+  LIVE
+  DEMO
+}

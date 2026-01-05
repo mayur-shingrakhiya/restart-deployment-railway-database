@@ -1,0 +1,9 @@
+node_modules
+.env
+.env.local
+logs/
+scripts/
+restate-server.exe
+*.log
+dist/
+.cache/

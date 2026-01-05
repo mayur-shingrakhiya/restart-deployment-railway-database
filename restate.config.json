@@ -1,0 +1,11 @@
+{
+  "schedules": [
+    {
+      "service": "BrokerageScheduler",
+      "key": "main-scheduler",
+      "handler": "execute",
+      "cron": "0 * * * *", 
+      "description": "Brokerage tasks - runs hourly"
+    }
+  ]
+}

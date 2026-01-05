@@ -1,0 +1,4 @@
+node_modules/
+logs/
+restate-server.exe
+restate-vercel-deploy.zip
